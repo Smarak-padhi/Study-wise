@@ -94,6 +94,10 @@ if __name__ == '__main__':
     print(f"📍 Health check: http://127.0.0.1:5000/api/health")
     app.run(host='127.0.0.1', port=5000, debug=True)
 
+@app.get("/")
+def home():
+    return "Study-Wise API is running ✅"
+
 @app.get("/api/health")
 def health():
-    return {"status": "ok"}
+    return {"ok": True}
