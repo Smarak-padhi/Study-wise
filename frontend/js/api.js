@@ -1,8 +1,8 @@
 // API Configuration and Wrapper
 const API_BASE_URL =
-  window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+  location.hostname === "localhost" || location.hostname === "127.0.0.1"
     ? "http://127.0.0.1:5000/api"
-    : "https://study-wise.onrender.com/api"; // <-- your Render backend
+    : "https://study-wise-production.up.railway.app/api";
 
 // Get user email from localStorage (simple session management)
 function getUserEmail() {
