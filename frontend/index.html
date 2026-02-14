@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyWise - AI-Powered Academic Planner</title>
+    <script src="js/theme.js"></script>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+    <style>
+        .hero {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 1rem;
+            margin-bottom: 3rem;
+        }
+        
+        .hero-title {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+        
+        .hero-button {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: white;
+            color: #667eea;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+        
+        .hero-button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .feature-card {
+            padding: 2rem;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .feature-description {
+            color: #6B7280;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div style="padding: 2rem 0;">
+            <div class="hero">
+                <div class="hero-title">📚 StudyWise</div>
+                <div class="hero-subtitle">Your AI-Powered Academic Companion</div>
+                <p style="margin-bottom: 2rem;">Upload syllabus, generate quizzes, and create personalized study plans</p>
+                <a href="pages/dashboard-v2.html" class="hero-button">Get Started →</a>
+            </div>
+
+            <div class="features">
+                <div class="feature-card">
+                    <div class="feature-icon">📤</div>
+                    <div class="feature-title">Smart Upload</div>
+                    <div class="feature-description">
+                        Upload your syllabus PDF and let AI extract topics automatically
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">📝</div>
+                    <div class="feature-title">Quiz Generator</div>
+                    <div class="feature-description">
+                        Generate custom quizzes based on your syllabus topics with AI
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">📅</div>
+                    <div class="feature-title">Study Planner</div>
+                    <div class="feature-description">
+                        Create personalized study schedules that adapt to your progress
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <div class="feature-title">Track Progress</div>
+                    <div class="feature-description">
+                        Monitor your learning journey with detailed analytics
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🕐</div>
+                    <div class="feature-title">Timetable</div>
+                    <div class="feature-description">
+                        Manage your class schedule and optimize study time
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">⚙️</div>
+                    <div class="feature-title">AI Modes</div>
+                    <div class="feature-description">
+                        Choose between Free, Local AI (Ollama), or Cloud AI
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; padding: 2rem; background: #F9FAFB; border-radius: 1rem;">
+                <h2 style="margin-bottom: 1rem;">Ready to transform your studying?</h2>
+                <p style="color: #6B7280; margin-bottom: 1.5rem;">
+                    Join thousands of students using StudyWise to ace their exams
+                </p>
+                <a href="pages/upload.html" class="hero-button">Start Uploading →</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

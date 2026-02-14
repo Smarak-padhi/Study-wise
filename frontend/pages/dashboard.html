@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - StudyWise</title>
+    <script src="../js/theme.js"></script>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/components.css">
+</head>
+<body>
+    <div class="layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-brand">
+                    <span class="sidebar-brand-icon">📚</span>
+                    <span>StudyWise</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Main</div>
+                    <a href="dashboard-v2.html" class="nav-item">
+                        <span class="nav-item-icon">📊</span>
+                        Dashboard
+                    </a>
+                    <a href="upload.html" class="nav-item">
+                        <span class="nav-item-icon">📤</span>
+                        Upload
+                    </a>
+                    <a href="quiz.html" class="nav-item">
+                        <span class="nav-item-icon">📝</span>
+                        Quizzes
+                    </a>
+                    <a href="plan.html" class="nav-item">
+                        <span class="nav-item-icon">📅</span>
+                        Study Plan
+                    </a>
+                    <a href="timetable.html" class="nav-item">
+                        <span class="nav-item-icon">🕐</span>
+                        Timetable
+                    </a>
+                    <a href="notes.html" class="nav-item">
+                        <span class="nav-item-icon">📋</span>
+                        Notes
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">System</div>
+                    <a href="settings.html" class="nav-item">
+                        <span class="nav-item-icon">⚙️</span>
+                        Settings
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar" id="userAvatar">S</div>
+                    <div class="user-info">
+                        <div class="user-name" id="userName">Student</div>
+                        <div class="user-email" id="userEmailSidebar">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">Dashboard</h1>
+                <p class="page-subtitle">Track your progress and upcoming activities</p>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📤</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Total Uploads</div>
+                        <div class="stat-value" id="totalUploads">0</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">📚</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Topics</div>
+                        <div class="stat-value" id="totalTopics">0</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">📝</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Quizzes Taken</div>
+                        <div class="stat-value" id="quizzesTaken">0</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">📈</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Avg Score</div>
+                        <div class="stat-value" id="avgScore">0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Recent Activity</h2>
+                </div>
+                <div class="card-body" id="recentActivity">
+                    <div class="empty-state">
+                        <div class="empty-icon">📊</div>
+                        <div class="empty-text">No recent activity</div>
+                        <p style="color: var(--text-tertiary); font-size: 0.875rem;">
+                            Upload a syllabus or take a quiz to see activity here
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/toast.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/dashboard.js"></script>
+</body>
+</html>

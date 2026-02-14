@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timetable - StudyWise</title>
+    <script src="../js/theme.js"></script>
+    <link rel="stylesheet" href="../css/design-system.css">
+    <link rel="stylesheet" href="../css/saas-components.css">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-brand">
+                    <span class="sidebar-brand-icon">📚</span>
+                    <span>StudyWise</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Main</div>
+                    <a href="dashboard-v2.html" class="nav-item">
+                        <span class="nav-item-icon">📊</span>
+                        Dashboard
+                    </a>
+                    <a href="upload.html" class="nav-item">
+                        <span class="nav-item-icon">📤</span>
+                        Upload
+                    </a>
+                    <a href="quiz.html" class="nav-item">
+                        <span class="nav-item-icon">📝</span>
+                        Quizzes
+                    </a>
+                    <a href="plan.html" class="nav-item">
+                        <span class="nav-item-icon">📅</span>
+                        Study Plan
+                    </a>
+                    <a href="timetable.html" class="nav-item">
+                        <span class="nav-item-icon">🕐</span>
+                        Timetable
+                    </a>
+                    <a href="notes.html" class="nav-item">
+                        <span class="nav-item-icon">📋</span>
+                        Notes
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">System</div>
+                    <a href="settings.html" class="nav-item">
+                        <span class="nav-item-icon">⚙️</span>
+                        Settings
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar" id="userAvatar">S</div>
+                    <div class="user-info">
+                        <div class="user-name" id="userName">Student</div>
+                        <div class="user-email" id="userEmailSidebar">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Wrapper -->
+        <div class="main-wrapper">
+            <header class="top-header">
+                <button class="mobile-menu-toggle">☰</button>
+                <div class="header-actions">
+                    <span class="user-email" id="userEmail">-</span>
+                </div>
+            </header>
+
+            <main class="main-content">
+                <div class="page-header">
+                    <h1 class="page-title">Class Timetable</h1>
+                    <p class="page-subtitle">Manage your weekly class schedule</p>
+                </div>
+
+                <!-- Add Class Form -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Add Class</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Day</label>
+                                <select id="daySelect" class="form-select">
+                                    <option value="0">Monday</option>
+                                    <option value="1">Tuesday</option>
+                                    <option value="2">Wednesday</option>
+                                    <option value="3">Thursday</option>
+                                    <option value="4">Friday</option>
+                                    <option value="5">Saturday</option>
+                                    <option value="6">Sunday</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Class Title</label>
+                                <input type="text" id="classTitle" class="form-input" placeholder="e.g., Math Lecture">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Start Time</label>
+                                <input type="time" id="startTime" class="form-input">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">End Time</label>
+                                <input type="time" id="endTime" class="form-input">
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary" onclick="addClass()" style="width: 100%;">
+                            Add to Timetable
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Timetable Display -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">My Classes</h2>
+                        <button class="btn btn-secondary" onclick="loadTimetable()">Refresh</button>
+                    </div>
+                    <div class="card-body" id="timetableList">
+                        <!-- Timetable will be loaded here -->
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="../js/toast.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/timetable.js"></script>
+</body>
+</html>

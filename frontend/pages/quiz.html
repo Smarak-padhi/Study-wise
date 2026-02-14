@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz - StudyWise</title>
+    <script src="../js/theme.js"></script>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/components.css">
+</head>
+<body>
+    <div class="layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-brand">
+                    <span class="sidebar-brand-icon">📚</span>
+                    <span>StudyWise</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Main</div>
+                    <a href="dashboard-v2.html" class="nav-item">
+                        <span class="nav-item-icon">📊</span>
+                        Dashboard
+                    </a>
+                    <a href="upload.html" class="nav-item">
+                        <span class="nav-item-icon">📤</span>
+                        Upload
+                    </a>
+                    <a href="quiz.html" class="nav-item">
+                        <span class="nav-item-icon">📝</span>
+                        Quizzes
+                    </a>
+                    <a href="plan.html" class="nav-item">
+                        <span class="nav-item-icon">📅</span>
+                        Study Plan
+                    </a>
+                    <a href="timetable.html" class="nav-item">
+                        <span class="nav-item-icon">🕐</span>
+                        Timetable
+                    </a>
+                    <a href="notes.html" class="nav-item">
+                        <span class="nav-item-icon">📋</span>
+                        Notes
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">System</div>
+                    <a href="settings.html" class="nav-item">
+                        <span class="nav-item-icon">⚙️</span>
+                        Settings
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar" id="userAvatar">S</div>
+                    <div class="user-info">
+                        <div class="user-name" id="userName">Student</div>
+                        <div class="user-email" id="userEmailSidebar">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">Quizzes</h1>
+                <p class="page-subtitle">Test your knowledge with AI-generated quizzes</p>
+            </div>
+
+            <!-- Generate Quiz -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Generate New Quiz</h2>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label class="form-label">Select Topic</label>
+                        <select id="topicSelect" class="form-select">
+                            <option value="">Choose a topic...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Number of Questions</label>
+                        <input type="number" id="numQuestions" class="form-input" value="5" min="1" max="20">
+                    </div>
+
+                    <button id="generateQuizBtn" class="btn btn-primary" style="width: 100%;" disabled>
+                        Generate Quiz
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quiz Container -->
+            <div id="quizContainer" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title" id="quizTitle">Quiz</h2>
+                        <div id="quizTimer"></div>
+                    </div>
+                    <div class="card-body" id="quizQuestions">
+                        <!-- Questions will be rendered here -->
+                    </div>
+                    <div class="card-footer">
+                        <button id="submitQuizBtn" class="btn btn-primary">Submit Quiz</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz History -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Quiz History</h2>
+                    <button onclick="loadQuizHistory()" class="btn btn-secondary">Refresh</button>
+                </div>
+                <div class="card-body" id="quizHistory">
+                    <!-- Quiz history will be loaded here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/toast.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/quiz.js"></script>
+</body>
+</html>

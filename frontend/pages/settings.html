@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - StudyWise</title>
+    <script src="../js/theme.js"></script>
+    <link rel="stylesheet" href="../css/design-system.css">
+    <link rel="stylesheet" href="../css/saas-components.css">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-brand">
+                    <span class="sidebar-brand-icon">📚</span>
+                    <span>StudyWise</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Main</div>
+                    <a href="dashboard-v2.html" class="nav-item">
+                        <span class="nav-item-icon">📊</span>
+                        Dashboard
+                    </a>
+                    <a href="upload.html" class="nav-item">
+                        <span class="nav-item-icon">📤</span>
+                        Upload
+                    </a>
+                    <a href="quiz.html" class="nav-item">
+                        <span class="nav-item-icon">📝</span>
+                        Quizzes
+                    </a>
+                    <a href="plan.html" class="nav-item">
+                        <span class="nav-item-icon">📅</span>
+                        Study Plan
+                    </a>
+                    <a href="timetable.html" class="nav-item">
+                        <span class="nav-item-icon">🕐</span>
+                        Timetable
+                    </a>
+                    <a href="notes.html" class="nav-item">
+                        <span class="nav-item-icon">📋</span>
+                        Notes
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">System</div>
+                    <a href="settings.html" class="nav-item">
+                        <span class="nav-item-icon">⚙️</span>
+                        Settings
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar" id="userAvatar">S</div>
+                    <div class="user-info">
+                        <div class="user-name" id="userName">Student</div>
+                        <div class="user-email" id="userEmailSidebar">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Wrapper -->
+        <div class="main-wrapper">
+            <header class="top-header">
+                <button class="mobile-menu-toggle">☰</button>
+                <div class="header-actions">
+                    <span class="badge badge-info" id="currentModeDisplay">Loading...</span>
+                </div>
+            </header>
+
+            <main class="main-content">
+                <div class="page-header">
+                    <h1 class="page-title">Settings</h1>
+                    <p class="page-subtitle">Configure AI modes and preferences</p>
+                </div>
+
+                <!-- AI Mode Configuration -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">AI Mode</h2>
+                    </div>
+                    <div class="card-body">
+                        <p style="margin-bottom: var(--spacing-6); color: var(--text-secondary);">
+                            Choose how StudyWise generates topics, quizzes, and summaries.
+                        </p>
+
+                        <div class="radio-group" id="aiModeOptions">
+                            <!-- Free Mode -->
+                            <label class="radio-option" data-mode="free">
+                                <input type="radio" name="aiMode" value="free" checked>
+                                <div class="radio-option-content">
+                                    <div class="radio-option-header">
+                                        <span class="radio-option-title">Free (Rule-based)</span>
+                                        <span class="badge badge-success" id="freeBadge">
+                                            <span class="badge-dot"></span> Ready
+                                        </span>
+                                    </div>
+                                    <div class="radio-option-description">
+                                        Uses pattern matching and algorithms. Fast and reliable.
+                                    </div>
+                                    <div class="radio-option-meta">
+                                        <span>💰 ₹0 / month</span>
+                                        <span>⚡ Instant</span>
+                                        <span>🎯 Recommended for basic use</span>
+                                    </div>
+                                </div>
+                            </label>
+
+                            <!-- Ollama Mode -->
+                            <label class="radio-option" data-mode="ollama">
+                                <input type="radio" name="aiMode" value="ollama">
+                                <div class="radio-option-content">
+                                    <div class="radio-option-header">
+                                        <span class="radio-option-title">Local AI (Ollama)</span>
+                                        <span class="badge badge-gray" id="ollamaBadge">
+                                            <span class="badge-dot"></span> Checking...
+                                        </span>
+                                    </div>
+                                    <div class="radio-option-description">
+                                        Runs AI models locally on your machine. Better quality than Free mode.
+                                    </div>
+                                    <div class="radio-option-meta">
+                                        <span>💰 ₹0 / month</span>
+                                        <span>🔒 Privacy-first</span>
+                                        <span>🎯 Better quality</span>
+                                    </div>
+                                    
+                                    <!-- Ollama Setup Guide -->
+                                    <div id="ollamaSetup" class="hidden" style="margin-top: var(--spacing-4);">
+                                        <div class="alert alert-info">
+                                            <span class="alert-icon">ℹ</span>
+                                            <div class="alert-content">
+                                                <div class="alert-title">Ollama not detected</div>
+                                                <p style="margin-top: var(--spacing-2); margin-bottom: var(--spacing-3);">
+                                                    Follow these steps to enable Local AI:
+                                                </p>
+                                                <ol style="margin-left: var(--spacing-4); font-size: var(--text-sm); line-height: 1.8;">
+                                                    <li>Download Ollama from <a href="https://ollama.ai" target="_blank" style="color: var(--primary-600); text-decoration: underline;">ollama.ai</a></li>
+                                                    <li>Open terminal and run: <code class="code-inline">ollama pull phi3</code></li>
+                                                    <li>Click "Test Ollama" button below</li>
+                                                </ol>
+                                                <button class="btn btn-sm btn-secondary" onclick="testOllama()" style="margin-top: var(--spacing-3);">
+                                                    Test Ollama
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+
+                            <!-- Cloud Mode -->
+                            <label class="radio-option" data-mode="cloud">
+                                <input type="radio" name="aiMode" value="cloud">
+                                <div class="radio-option-content">
+                                    <div class="radio-option-header">
+                                        <span class="radio-option-title">Cloud AI (OpenAI)</span>
+                                        <span class="badge badge-gray" id="cloudBadge">
+                                            <span class="badge-dot"></span> Checking...
+                                        </span>
+                                    </div>
+                                    <div class="radio-option-description">
+                                        Powered by OpenAI GPT-4. Highest quality results but requires API key and costs per use.
+                                    </div>
+                                    <div class="radio-option-meta">
+                                        <span>💰 Pay per use</span>
+                                        <span>☁️ Cloud-based</span>
+                                        <span>🌟 Best quality</span>
+                                    </div>
+
+                                    <!-- Cloud Setup -->
+                                    <div id="cloudSetup" class="hidden" style="margin-top: var(--spacing-4);">
+                                        <div class="alert alert-warning">
+                                            <span class="alert-icon">⚠️</span>
+                                            <div class="alert-content">
+                                                <div class="alert-title">API Key Required</div>
+                                                <p style="margin-top: var(--spacing-2);">
+                                                    OpenAI API key must be configured server-side by the administrator.
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Dev Only Section -->
+                                        <div class="accordion" style="margin-top: var(--spacing-4);">
+                                            <div class="accordion-item">
+                                                <div class="accordion-header" onclick="toggleAccordion(this)">
+                                                    <div style="display: flex; align-items: center; gap: var(--spacing-2);">
+                                                        <span class="alert-icon" style="font-size: var(--text-sm);">⚠️</span>
+                                                        <span style="font-weight: var(--font-semibold);">For Development Only</span>
+                                                    </div>
+                                                    <span class="accordion-icon">▼</span>
+                                                </div>
+                                                <div class="accordion-content">
+                                                    <div class="accordion-body">
+                                                        <div class="form-group">
+                                                            <label class="form-label">OpenAI API Key (Dev Only)</label>
+                                                            <input type="password" class="form-input" id="devApiKey" placeholder="sk-...">
+                                                            <div class="form-hint">⚠️ For development only. Not recommended for production.</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="divider"></div>
+
+                        <div style="display: flex; gap: var(--spacing-3);">
+                            <button class="btn btn-primary" onclick="saveAIMode()">
+                                Save Settings
+                            </button>
+                            <button class="btn btn-secondary" onclick="testAllModes()">
+                                Test All Modes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Appearance Settings -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Appearance</h2>
+                    </div>
+                    <div class="card-body">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h3 style="font-weight: var(--font-semibold); margin-bottom: var(--spacing-1);">Dark Mode</h3>
+                                <p style="color: var(--text-tertiary); font-size: var(--text-sm);">
+                                    Switch between light and dark theme
+                                </p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="darkModeToggle">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ollama Setup Guide (Windows) -->
+                <div class="card" id="ollamaGuideCard" style="display: none;">
+                    <div class="card-header">
+                        <h2 class="card-title">Enable Local AI (Recommended) 🚀</h2>
+                    </div>
+                    <div class="card-body">
+                        <div style="margin-bottom: var(--spacing-4);">
+                            <p style="color: var(--text-secondary); margin-bottom: var(--spacing-3);">
+                                Install Ollama to run AI models locally on your Windows PC. Free, private, and works offline.
+                            </p>
+                        </div>
+
+                        <div class="accordion">
+                            <div class="accordion-item">
+                                <div class="accordion-header" onclick="toggleAccordion(this)">
+                                    <div style="display: flex; align-items: center; gap: var(--spacing-2);">
+                                        <span style="font-weight: var(--font-semibold);">Step 1: Download Ollama</span>
+                                    </div>
+                                    <span class="accordion-icon">▼</span>
+                                </div>
+                                <div class="accordion-content">
+                                    <div class="accordion-body">
+                                        <ol style="margin-left: var(--spacing-4); line-height: 1.8;">
+                                            <li>Visit <a href="https://ollama.ai/download" target="_blank" style="color: var(--primary-600); text-decoration: underline;">ollama.ai/download</a></li>
+                                            <li>Click "Download for Windows"</li>
+                                            <li>Run the installer (OllamaSetup.exe)</li>
+                                            <li>Follow the installation wizard</li>
+                                        </ol>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <div class="accordion-header" onclick="toggleAccordion(this)">
+                                    <div style="display: flex; align-items: center; gap: var(--spacing-2);">
+                                        <span style="font-weight: var(--font-semibold);">Step 2: Install AI Model</span>
+                                    </div>
+                                    <span class="accordion-icon">▼</span>
+                                </div>
+                                <div class="accordion-content">
+                                    <div class="accordion-body">
+                                        <ol style="margin-left: var(--spacing-4); line-height: 1.8;">
+                                            <li>Open Command Prompt (Win + R, type "cmd", press Enter)</li>
+                                            <li>Run this command:</li>
+                                        </ol>
+                                        <div style="background: var(--gray-100); padding: var(--spacing-3); border-radius: var(--radius-md); margin: var(--spacing-3) 0; font-family: monospace; font-size: var(--text-sm);">
+                                            ollama pull qwen2.5:7b
+                                        </div>
+                                        <p style="color: var(--text-tertiary); font-size: var(--text-sm); margin-top: var(--spacing-2);">
+                                            This will download a 4GB AI model (one-time download).
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <div class="accordion-header" onclick="toggleAccordion(this)">
+                                    <div style="display: flex; align-items: center; gap: var(--spacing-2);">
+                                        <span style="font-weight: var(--font-semibold);">Step 3: Test Connection</span>
+                                    </div>
+                                    <span class

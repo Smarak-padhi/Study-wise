@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyWise - API Test</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+        .test { padding: 15px; margin: 10px 0; border-radius: 8px; border: 1px solid #ddd; }
+        .success { background: #d1fae5; border-color: #059669; }
+        .error { background: #fee2e2; border-color: #dc2626; }
+        .info { background: #e0e7ff; border-color: #4f46e5; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        pre { background: #f3f4f6; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>StudyWise API Test</h1>
+    
+    <div id="status" class="test info">
+        <strong>Status:</strong> Loading...
+    </div>
+
+    <div class="test">
+        <h3>1. API Base URL Test</h3>
+        <button onclick="testAPIBase()">Test API Base</button>
+        <div id="apiBaseResult"></div>
+    </div>
+
+    <div class="test">
+        <h3>2. Helper Functions Test</h3>
+        <button onclick="testHelpers()">Test Helpers</button>
+        <div id="helpersResult"></div>
+    </div>
+
+    <div class="test">
+        <h3>3. Dashboard Stats Test (Empty OK)</h3>
+        <button onclick="testDashboardStats()">Test Dashboard Stats</button>
+        <div id="statsResult"></div>
+    </div>
+
+    <div class="test">
+        <h3>4. File Upload Test</h3>
+        <input type="file" id="testFile" accept=".pdf">
+        <input type="text" id="testSubject" placeholder="Subject" value="Test Subject">
+        <button onclick="testUpload()">Test Upload</button>
+        <div id="uploadResult"></div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        document.getElementById('status').innerHTML = '<strong>Status:</strong> ✅ Scripts loaded successfully!';
+        document.getElementById('status').className = 'test success';
+
+        function testAPIBase() {
+            const result = document.getElementById('apiBaseResult');
+            const expectedBase = 'http://127.0.0.1:5000/api';
+            result.innerHTML = `
+                <pre>API_BASE_URL: ${API_BASE_URL}
+API_BASE: ${API_BASE}
+api.baseURL: ${api.baseURL}
+Expected: ${expectedBase}
+
+Match: ${api.baseURL === expectedBase ? '✅ YES' : '❌ NO'}</pre>
+            `;
+        }
+
+        function testHelpers() {
+            const result = document.getElementById('helpersResult');
+            const tests = {
+                'showLoading': typeof showLoading !== 'undefined',
+                'showError': typeof showError !== 'undefined',
+                'showSuccess': typeof showSuccess !== 'undefined',
+                'api': typeof api !== 'undefined',
+                'AIMode': typeof AIMode !== 'undefined'
+            };
+            
+            const status = Object.entries(tests).map(([name, exists]) => 
+                `${name}: ${exists ? '✅' : '❌'}`
+            ).join('<br>');
+            
+            result.innerHTML = `<div>${status}</div>`;
+        }
+
+        async function testDashboardStats() {
+            const result = document.getElementById('statsResult');
+            result.innerHTML = 'Loading...';
+            
+            try {
+                const data = await api.getDashboardStats();
+                result.innerHTML = `
+                    <div class="success">✅ Stats loaded successfully (empty data is OK!)</div>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                result.innerHTML = `
+                    <div class="error">❌ Error: ${error.message}</div>
+                    <pre>${error.stack}</pre>
+                `;
+            }
+        }
+
+        async function testUpload() {
+            const result = document.getElementById('uploadResult');
+            const fileInput = document.getElementById('testFile');
+            const subject = document.getElementById('testSubject').value;
+            
+            if (!fileInput.files[0]) {
+                result.innerHTML = '<div class="error">❌ Please select a PDF file</div>';
+                return;
+            }
+
+            const file = fileInput.files[0];
+            
+            if (!file.name.endsWith('.pdf')) {
+                result.innerHTML = '<div class="error">❌ Only PDF files allowed</div>';
+                return;
+            }
+
+            if (file.size > 30 * 1024 * 1024) {
+                result.innerHTML = '<div class="error">❌ File must be under 30MB</div>';
+                return;
+            }
+
+            result.innerHTML = 'Uploading...';
+            
+            try {
+                const data = await api.uploadSyllabus(file, subject);
+                result.innerHTML = `
+                    <div class="success">✅ Upload successful!</div>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                result.innerHTML = `
+                    <div class="error">❌ Upload failed: ${error.message}</div>
+                    <pre>Make sure backend is running at http://localhost:5000</pre>
+                `;
+            }
+        }
+
+        // Auto-run basic tests on load
+        testAPIBase();
+        testHelpers();
+    </script>
+</body>
+</html>

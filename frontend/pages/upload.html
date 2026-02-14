@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload - StudyWise</title>
+    <script src="../js/theme.js"></script>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/components.css">
+</head>
+<body>
+    <div class="layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-brand">
+                    <span class="sidebar-brand-icon">📚</span>
+                    <span>StudyWise</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Main</div>
+                    <a href="dashboard-v2.html" class="nav-item">
+                        <span class="nav-item-icon">📊</span>
+                        Dashboard
+                    </a>
+                    <a href="upload.html" class="nav-item">
+                        <span class="nav-item-icon">📤</span>
+                        Upload
+                    </a>
+                    <a href="quiz.html" class="nav-item">
+                        <span class="nav-item-icon">📝</span>
+                        Quizzes
+                    </a>
+                    <a href="plan.html" class="nav-item">
+                        <span class="nav-item-icon">📅</span>
+                        Study Plan
+                    </a>
+                    <a href="timetable.html" class="nav-item">
+                        <span class="nav-item-icon">🕐</span>
+                        Timetable
+                    </a>
+                    <a href="notes.html" class="nav-item">
+                        <span class="nav-item-icon">📋</span>
+                        Notes
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">System</div>
+                    <a href="settings.html" class="nav-item">
+                        <span class="nav-item-icon">⚙️</span>
+                        Settings
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar" id="userAvatar">S</div>
+                    <div class="user-info">
+                        <div class="user-name" id="userName">Student</div>
+                        <div class="user-email" id="userEmailSidebar">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">Upload Files</h1>
+                <p class="page-subtitle">Upload syllabus and previous year questions</p>
+            </div>
+
+            <!-- Upload Syllabus Section -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Upload Syllabus</h2>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label class="form-label">Subject Name</label>
+                        <input type="text" id="subjectInput" class="form-input" placeholder="e.g., Machine Learning" required>
+                    </div>
+
+                    <div class="upload-zone" id="syllabusUploadZone">
+                        <div class="upload-icon">📄</div>
+                        <div class="upload-text">
+                            <strong>Click to upload</strong> or drag and drop
+                        </div>
+                        <div class="upload-hint">PDF files only (Max 30MB)</div>
+                        <input type="file" id="syllabusFileInput" accept=".pdf" style="display: none;">
+                    </div>
+
+                    <div id="syllabusStatus" class="mt-2"></div>
+
+                    <button id="uploadSyllabusBtn" class="btn btn-primary mt-2" style="width: 100%;" disabled>
+                        Upload Syllabus
+                    </button>
+                </div>
+            </div>
+
+            <!-- Upload PYQ Section -->
+            <div class="card" id="pyqSection">
+                <div class="card-header">
+                    <h2 class="card-title">Upload Previous Year Questions</h2>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label class="form-label">Select Syllabus Upload</label>
+                        <select id="pyqSubjectSelect" class="form-select">
+                            <option value="">Choose a subject...</option>
+                        </select>
+                        <small class="form-hint" id="pyqHint" style="display: none; color: #6B7280; margin-top: 0.5rem;">
+                            Upload a syllabus first to link your PYQs.
+                        </small>
+                    </div>
+
+                    <div class="upload-zone" id="pyqUploadZone">
+                        <div class="upload-icon">📝</div>
+                        <div class="upload-text">
+                            <strong>Click to upload PYQ</strong> or drag and drop
+                        </div>
+                        <div class="upload-hint">PDF files only (Max 30MB)</div>
+                        <input type="file" id="pyqFileInput" accept=".pdf" style="display: none;">
+                    </div>
+
+                    <div id="pyqStatus" class="mt-2"></div>
+
+                    <button id="uploadPyqBtn" class="btn btn-primary mt-2" style="width: 100%;" disabled>
+                        Upload PYQ
+                    </button>
+                </div>
+            </div>
+
+            <!-- My Uploads -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">My Uploads</h2>
+                    <button onclick="loadUploads()" class="btn btn-secondary">Refresh</button>
+                </div>
+                <div class="card-body" id="uploadsList">
+                    <!-- Uploads list will be loaded here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/toast.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/upload.js"></script>
+</body>
+</html>
