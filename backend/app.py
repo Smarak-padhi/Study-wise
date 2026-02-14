@@ -13,20 +13,22 @@ app.config.from_object(Config)
 app.config['MAX_CONTENT_LENGTH'] = Config.MAX_CONTENT_LENGTH
 
 # Enable CORS - Allow frontend on port 5500
+from flask_cors import CORS
+
 CORS(app, resources={
     r"/api/*": {
         "origins": [
-            "http://127.0.0.1:5000",
-            "http://localhost:5000",
-            "http://127.0.0.1:5500",
             "http://localhost:5500",
-            "http://localhost:8000"
+            "http://127.0.0.1:5500",
+            "http://localhost:8000",
+            "https://studywisee.netlify.app"
         ],
         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization"],
         "supports_credentials": False
     }
 })
+
 
 # Validate configuration
 try:
