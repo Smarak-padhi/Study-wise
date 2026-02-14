@@ -93,3 +93,7 @@ if __name__ == '__main__':
     print(f"📍 API will be available at: http://127.0.0.1:5000")
     print(f"📍 Health check: http://127.0.0.1:5000/api/health")
     app.run(host='127.0.0.1', port=5000, debug=True)
+
+@app.get("/api/health")
+def health():
+    return {"status": "ok"}
