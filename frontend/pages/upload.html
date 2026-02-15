@@ -152,5 +152,16 @@
     <script src="../js/toast.js"></script>
     <script src="../js/api.js"></script>
     <script src="../js/upload.js"></script>
+    <script>
+        console.log('🧪 TEST: Script loaded!');
+        console.log('🧪 window.api exists?', typeof window.api);
+        console.log('🧪 DOMContentLoaded will fire...');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('✅ DOMContentLoaded fired!');
+            console.log('✅ API:', window.api);
+            console.log('✅ Email:', window.api?.userEmail);
+        });
+    </script>
 </body>
 </html>
