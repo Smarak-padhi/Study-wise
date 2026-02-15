@@ -1,32 +1,29 @@
-# At the top of app.py
 from flask import Flask, jsonify
 from flask_cors import CORS
 from config import Config
 import os
+import sys
 
-# These imports might fail if blueprints don't exist
-from routes.upload import upload_bp
-from routes.quiz import quiz_bp
-from routes.plan import plan_bp
-from routes.dashboard import dashboard_bp
+# Startup logging
+print("=" * 60)
+print("🚀 Starting StudyWise Backend...")
+print(f"Python: {sys.version}")
+print(f"Port: {os.getenv('PORT', '5000')}")
+print("=" * 60)
 
 # Initialize Flask app
 app = Flask(__name__)
 app.config.from_object(Config)
 app.config['MAX_CONTENT_LENGTH'] = Config.MAX_CONTENT_LENGTH
 
-# Enable CORS - Allow frontend on port 5500
-from flask_cors import CORS
-
+# ✅ CORS Configuration (only once!)
 CORS(app, resources={
     r"/api/*": {
         "origins": [
-            "http://127.0.0.1:5000",
-            "http://localhost:5000",
             "http://127.0.0.1:5500",
             "http://localhost:5500",
-            "https://studywisee.netlify.app",  # ✅ Netlify frontend
-            "https://*.netlify.app"  # ✅ Allow all Netlify preview deploys
+            "https://studywisee.netlify.app",
+            "https://*.netlify.app"
         ],
         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization"],
@@ -35,23 +32,76 @@ CORS(app, resources={
     }
 })
 
+print("✅ CORS configured")
 
 # Validate configuration
 try:
     Config.validate()
+    print("✅ Config validated")
 except ValueError as e:
-    print(f"Configuration error: {str(e)}")
-    print("Please check your .env file")
+    print(f"❌ Config error: {str(e)}")
     exit(1)
 
-# Register blueprints
-app.register_blueprint(upload_bp, url_prefix='/api/upload')
-app.register_blueprint(quiz_bp, url_prefix='/api/quiz')
-app.register_blueprint(plan_bp, url_prefix='/api/plan')
-app.register_blueprint(dashboard_bp, url_prefix='/api/dashboard')
-app.register_blueprint(ai_bp, url_prefix='/api/ai')
-app.register_blueprint(timetable_bp, url_prefix='/api/timetable')
-app.register_blueprint(notes_bp, url_prefix='/api/notes')
+# Import blueprints with error handling
+blueprints_loaded = []
+
+try:
+    from routes.upload import upload_bp
+    app.register_blueprint(upload_bp, url_prefix='/api/upload')
+    blueprints_loaded.append('upload')
+    print("✅ Upload routes registered")
+except Exception as e:
+    print(f"⚠️ Upload routes failed: {e}")
+
+try:
+    from routes.quiz import quiz_bp
+    app.register_blueprint(quiz_bp, url_prefix='/api/quiz')
+    blueprints_loaded.append('quiz')
+    print("✅ Quiz routes registered")
+except Exception as e:
+    print(f"⚠️ Quiz routes failed: {e}")
+
+try:
+    from routes.plan import plan_bp
+    app.register_blueprint(plan_bp, url_prefix='/api/plan')
+    blueprints_loaded.append('plan')
+    print("✅ Plan routes registered")
+except Exception as e:
+    print(f"⚠️ Plan routes failed: {e}")
+
+try:
+    from routes.dashboard import dashboard_bp
+    app.register_blueprint(dashboard_bp, url_prefix='/api/dashboard')
+    blueprints_loaded.append('dashboard')
+    print("✅ Dashboard routes registered")
+except Exception as e:
+    print(f"⚠️ Dashboard routes skipped: {e}")
+
+try:
+    from routes.ai_mode import ai_bp
+    app.register_blueprint(ai_bp, url_prefix='/api/ai')
+    blueprints_loaded.append('ai')
+    print("✅ AI routes registered")
+except Exception as e:
+    print(f"⚠️ AI routes skipped: {e}")
+
+try:
+    from routes.timetable import timetable_bp
+    app.register_blueprint(timetable_bp, url_prefix='/api/timetable')
+    blueprints_loaded.append('timetable')
+    print("✅ Timetable routes registered")
+except Exception as e:
+    print(f"⚠️ Timetable routes skipped: {e}")
+
+try:
+    from routes.notes import notes_bp
+    app.register_blueprint(notes_bp, url_prefix='/api/notes')
+    blueprints_loaded.append('notes')
+    print("✅ Notes routes registered")
+except Exception as e:
+    print(f"⚠️ Notes routes skipped: {e}")
+
+print(f"📦 Loaded blueprints: {', '.join(blueprints_loaded)}")
 
 # Health check endpoint
 @app.route('/api/health', methods=['GET'])
@@ -60,31 +110,20 @@ def health_check():
     return jsonify({
         'status': 'healthy',
         'message': 'StudyWise API is running',
-        'version': '1.0.0'
+        'version': '1.0.0',
+        'blueprints': blueprints_loaded
     }), 200
 
 # Root endpoint
 @app.route('/', methods=['GET'])
 def root():
-    """Root endpoint"""
+    """Root endpoint - API info"""
     return jsonify({
         'name': 'StudyWise API',
+        'status': 'running',
         'version': '1.0.0',
-        'endpoints': {
-            'upload_syllabus': '/api/upload/syllabus',
-            'upload_pyq': '/api/upload/pyq',
-            'get_uploads': '/api/upload/uploads/<email>',
-            'generate_quiz': '/api/quiz/generate',
-            'submit_quiz': '/api/quiz/submit',
-            'quiz_history': '/api/quiz/history/<email>',
-            'generate_plan': '/api/plan/generate',
-            'get_plan': '/api/plan/<email>',
-            'dashboard_stats': '/api/dashboard/stats/<email>',
-            'dashboard_overview': '/api/dashboard/overview/<email>',
-            'health': '/api/health',
-            'timetable': '/api/timetable',
-            'notes': '/api/notes'
-        }
+        'health': '/api/health',
+        'blueprints': blueprints_loaded
     }), 200
 
 # Error handlers
@@ -96,14 +135,11 @@ def not_found(error):
 def internal_error(error):
     return jsonify({'error': 'Internal server error'}), 500
 
+# Start server
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 5000))
-    print("🚀 Starting StudyWise API...")
-    print(f"📍 Port: {port}")
-    print(f"📍 Health: /api/health")
-    app.run(host='0.0.0.0', port=port, debug=os.getenv('FLASK_ENV') != 'production')
-
-@app.get("/")
-def home():
-    return "Study-Wise API is running ✅"
-
+    print("=" * 60)
+    print(f"🌐 Server starting on port {port}")
+    print(f"📍 Health: http://0.0.0.0:{port}/api/health")
+    print("=" * 60)
+    app.run(host='0.0.0.0', port=port, debug=False)
