@@ -18,26 +18,12 @@ from flask_cors import CORS
 CORS(app, resources={
     r"/api/*": {
         "origins": [
-            "http://localhost:5500",
-            "http://127.0.0.1:5500",
-            "http://localhost:8000",
-            "https://studywisee.netlify.app"
-        ],
-        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization"],
-        "supports_credentials": False
-    }
-})
-
-CORS(app, resources={
-    r"/api/*": {
-        "origins": [
             "http://127.0.0.1:5000",
             "http://localhost:5000",
             "http://127.0.0.1:5500",
             "http://localhost:5500",
             "https://studywisee.netlify.app",  # ✅ Netlify frontend
-            "study-wise-production.up.railway.app"  # ✅ Railway backend (if frontend calls itself)
+            "study-wise-production-eaa1.up.railway.app"  # ✅ Railway backend (if frontend calls itself)
         ],
         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization"],
