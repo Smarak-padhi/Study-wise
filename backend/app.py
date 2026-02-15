@@ -100,6 +100,3 @@ if __name__ == '__main__':
 def home():
     return "Study-Wise API is running ✅"
 
-@app.get("/api/health")
-def health():
-    return {"ok": True}
