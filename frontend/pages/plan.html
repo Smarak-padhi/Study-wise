@@ -79,13 +79,24 @@
                 <div class="card-header">
                     <h2 class="card-title">Generate Study Plan</h2>
                 </div>
-                <div class="card-body">
+                <div class="card-body"><div class="form-group">
+                    <label class="form-label">Select Syllabus</label>
+                    <select id="uploadSelect" class="form-select">
+                        <option value="">Loading uploads...</option>
+                    </select>
+                </div>
+                    
+                    
                     <div class="form-group">
-                        <label class="form-label">Select Upload</label>
-                        <select id="uploadSelect" class="form-select">
-                            <option value="">Choose a syllabus...</option>
-                        </select>
+                        <label class="form-label">Start Date</label>
+                        <input type="date" id="startDate" class="form-input">
                     </div>
+
+                    <div class="form-group">
+                    <label class="form-label">End Date</label>
+                    <input type="date" id="endDate" class="form-input">
+                    </div>
+
 
                     <div class="form-group">
                         <label class="form-label">Study Hours Per Day</label>

@@ -76,18 +76,30 @@
             </div>
 
             <!-- Generate Quiz -->
+            <!-- In quiz.html, update the form section: -->
+
             <div class="card">
                 <div class="card-header">
                     <h2 class="card-title">Generate New Quiz</h2>
                 </div>
                 <div class="card-body">
+                    <!-- STEP 1: Select Subject -->
                     <div class="form-group">
-                        <label class="form-label">Select Topic</label>
-                        <select id="topicSelect" class="form-select">
-                            <option value="">Choose a topic...</option>
+                        <label class="form-label">Select Subject</label>
+                        <select id="subjectSelect" class="form-select">
+                            <option value="">Loading...</option>
                         </select>
                     </div>
 
+                    <!-- STEP 2: Select Topic -->
+                    <div class="form-group">
+                        <label class="form-label">Select Topic</label>
+                        <select id="topicSelect" class="form-select">
+                            <option value="">Select a subject first</option>
+                        </select>
+                    </div>
+
+                    <!-- Number of questions -->
                     <div class="form-group">
                         <label class="form-label">Number of Questions</label>
                         <input type="number" id="numQuestions" class="form-input" value="5" min="1" max="20">

@@ -8,6 +8,45 @@ from config import Config
 
 upload_bp = Blueprint('upload', __name__)
 
+@upload_bp.route('/topics/<upload_id>', methods=['GET'])
+def get_topics(upload_id):
+    """Get all topics for a specific upload"""
+    try:
+        from database import db
+        
+        # Get topics for this upload
+        topics = db.get_topics_by_upload(upload_id)
+        
+        if not topics:
+            return jsonify({
+                'topics': [],
+                'message': 'No topics found for this upload'
+            }), 200
+        
+        # Format response
+        formatted_topics = [
+            {
+                'id': topic.get('id'),
+                'topic_name': topic.get('topic_name'),
+                'description': topic.get('description', ''),
+                'difficulty_level': topic.get('difficulty_level', 'medium'),
+                'estimated_hours': topic.get('estimated_hours', 0)
+            }
+            for topic in topics
+        ]
+        
+        return jsonify({
+            'topics': formatted_topics,
+            'count': len(formatted_topics)
+        }), 200
+        
+    except Exception as e:
+        print(f"Error fetching topics: {str(e)}")
+        return jsonify({
+            'error': 'Failed to fetch topics',
+            'topics': []
+        }), 500
+
 @upload_bp.route('/syllabus', methods=['GET'])
 def upload_syllabus_get():
     """Reject GET requests with clear message"""

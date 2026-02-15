@@ -1,251 +1,296 @@
-// Study Plan Page Logic
+// Study Plan Page Logic - Production Ready
 
-let selectedUploadId = null;
-let currentTopics = [];
+// Helper function for safe DOM access
+const $ = (id) => document.getElementById(id);
+
+let currentPlan = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
-    await loadSubjects();
+    const uploadSelect = $('uploadSelect');
     
-    // Check if upload ID in URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const uploadId = urlParams.get('upload');
-    if (uploadId) {
-        document.getElementById('subjectSelect').value = uploadId;
-        await handleSubjectChange({ target: { value: uploadId } });
-    }
-
-    document.getElementById('subjectSelect').addEventListener('change', handleSubjectChange);
-    document.getElementById('generatePlanBtn').addEventListener('click', generatePlan);
-
-    // Set default dates
-    const today = new Date();
-    const nextMonth = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
-    document.getElementById('startDate').value = today.toISOString().split('T')[0];
-    document.getElementById('endDate').value = nextMonth.toISOString().split('T')[0];
-});
-
-async function loadSubjects() {
-    try {
-        const { uploads } = await api.getUploads();
-
-        const subjectSelect = document.getElementById('subjectSelect');
-        
-        if (!uploads || uploads.length === 0) {
-            subjectSelect.innerHTML = '<option value="">No subjects available - Upload a syllabus first</option>';
-            return;
-        }
-
-        subjectSelect.innerHTML = '<option value="">Choose a subject...</option>' +
-            uploads.map(u => `<option value="${u.id}">${u.subject || u.filename}</option>`).join('');
-
-    } catch (error) {
-        console.error('Failed to load subjects:', error);
-    }
-}
-
-async function handleSubjectChange(e) {
-    const uploadId = e.target.value;
-    const generateBtn = document.getElementById('generatePlanBtn');
-
-    if (!uploadId) {
-        generateBtn.disabled = true;
-        document.getElementById('topicsList').innerHTML = `
-            <div class="empty-state">
-                <div class="empty-icon">📚</div>
-                <div class="empty-text">Select a subject to view topics</div>
-            </div>
-        `;
+    if (!uploadSelect) {
+        console.log('Not on plan page');
         return;
     }
 
-    selectedUploadId = uploadId;
-    generateBtn.disabled = false;
+    console.log('✅ Plan page initialized');
 
-    await loadTopics(uploadId);
-    await loadExistingPlan(uploadId);
+    initUserInfo();
+    await loadUploads();
+    setupEventListeners();
+    await loadStudyPlan();
+});
+
+function initUserInfo() {
+    const email = window.api.userEmail;
+    const emailEl = $('userEmailSidebar');
+    const nameEl = $('userName');
+    const avatarEl = $('userAvatar');
+    
+    if (emailEl) emailEl.textContent = email;
+    if (nameEl) nameEl.textContent = email.split('@')[0] || 'Student';
+    if (avatarEl) avatarEl.textContent = (email[0] || 'S').toUpperCase();
 }
 
-async function loadTopics(uploadId) {
-    const container = document.getElementById('topicsList');
-    showLoading('topicsList');
+async function loadUploads() {
+    const uploadSelect = $('uploadSelect');
+    const generateBtn = $('generatePlanBtn');
+    
+    if (!uploadSelect) {
+        console.warn('⚠️ uploadSelect not found');
+        return;
+    }
+
+    uploadSelect.innerHTML = '<option value="">Loading...</option>';
+    uploadSelect.disabled = true;
+    if (generateBtn) generateBtn.disabled = true;
 
     try {
-        const { topics } = await api.getTopics(uploadId, true);
-        currentTopics = topics;
+        console.log('🔍 Fetching uploads for plan page...');
+        
+        const response = await window.api.getUploads();
+        
+        // Handle response shape: could be array or {uploads: array}
+        let uploads = [];
+        if (Array.isArray(response)) {
+            uploads = response;
+        } else if (response && Array.isArray(response.uploads)) {
+            uploads = response.uploads;
+        }
 
-        if (!topics || topics.length === 0) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-icon">📚</div>
-                    <div class="empty-text">No topics found</div>
-                </div>
-            `;
+        console.log(`📦 Loaded ${uploads.length} uploads`);
+
+        if (uploads.length === 0) {
+            uploadSelect.innerHTML = '<option value="">No uploads - Upload syllabus first</option>';
+            uploadSelect.disabled = true;
+            if (generateBtn) generateBtn.disabled = true;
+            
+            if (typeof toast !== 'undefined') {
+                toast.info('Upload a syllabus to create study plans');
+            }
             return;
         }
 
-        container.innerHTML = topics.map(topic => {
-            const progress = topic.progress || { status: 'not_started', hours_spent: 0 };
-            const statusColors = {
-                'not_started': 'badge-info',
-                'in_progress': 'badge-warning',
-                'completed': 'badge-success'
-            };
+        uploadSelect.innerHTML = '<option value="">Choose a syllabus...</option>' +
+            uploads.map(u => {
+                const subject = u.subject || u.filename || 'Untitled';
+                const count = u.topics_count || 0;
+                return `<option value="${u.id}">${subject} (${count} topics)</option>`;
+            }).join('');
 
-            return `
-                <div class="topic-card">
-                    <div class="topic-header">
-                        <div>
-                            <div class="topic-name">${topic.topic_name}</div>
-                            ${topic.description ? `<div style="color: var(--text-tertiary); font-size: 0.875rem; margin-top: 0.25rem;">${topic.description}</div>` : ''}
-                        </div>
-                        <div style="display: flex; gap: 0.5rem; align-items: center;">
-                            <span class="topic-difficulty difficulty-${topic.difficulty_level}">
-                                ${topic.difficulty_level}
-                            </span>
-                            <span class="badge ${statusColors[progress.status]}">
-                                ${progress.status.replace('_', ' ')}
-                            </span>
-                        </div>
-                    </div>
-                    <div class="topic-meta">
-                        <span>⏱️ Estimated: ${topic.estimated_hours}h</span>
-                        <span>📊 Spent: ${progress.hours_spent}h</span>
-                    </div>
-                    <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
-                        <button onclick="updateTopicStatus('${topic.id}', 'in_progress')" 
-                                class="btn btn-secondary" style="flex: 1; padding: 0.5rem;">
-                            Start
-                        </button>
-                        <button onclick="updateTopicStatus('${topic.id}', 'completed')" 
-                                class="btn btn-success" style="flex: 1; padding: 0.5rem;">
-                            Complete
-                        </button>
-                        <button onclick="generateTopicQuiz('${topic.id}')" 
-                                class="btn btn-primary" style="flex: 1; padding: 0.5rem;">
-                            Quiz
-                        </button>
-                    </div>
-                </div>
-            `;
-        }).join('');
+        uploadSelect.disabled = false;
 
     } catch (error) {
-        showError('topicsList', 'Failed to load topics');
+        console.error('❌ Load uploads error:', error);
+        uploadSelect.innerHTML = '<option value="">Error loading</option>';
+        uploadSelect.disabled = true;
+        if (generateBtn) generateBtn.disabled = true;
     }
 }
 
-async function updateTopicStatus(topicId, status) {
-    try {
-        // Prompt for hours if completing
-        let hours = 0;
-        if (status === 'completed') {
-            const hoursInput = prompt('How many hours did you spend on this topic?');
-            if (hoursInput === null) return;
-            hours = parseFloat(hoursInput) || 0;
-        }
+function setupEventListeners() {
+    const uploadSelect = $('uploadSelect');
+    const generateBtn = $('generatePlanBtn');
+    const hoursPerDay = $('hoursPerDay');
+    const targetDate = $('targetDate');
 
-        await api.updateProgress(topicId, status, hours);
-        
-        // Reload topics
-        if (selectedUploadId) {
-            await loadTopics(selectedUploadId);
-        }
+    if (uploadSelect && generateBtn) {
+        uploadSelect.addEventListener('change', () => {
+            generateBtn.disabled = !uploadSelect.value;
+        });
 
-    } catch (error) {
-        alert('Failed to update status: ' + error.message);
+        generateBtn.addEventListener('click', generatePlan);
     }
-}
 
-async function generateTopicQuiz(topicId) {
-    window.location.href = `quiz.html?topic=${topicId}`;
+    if (hoursPerDay) {
+        hoursPerDay.addEventListener('input', () => {
+            let val = parseInt(hoursPerDay.value);
+            if (val < 1) hoursPerDay.value = 1;
+            if (val > 12) hoursPerDay.value = 12;
+        });
+    }
+
+    if (targetDate && !targetDate.value) {
+        const date = new Date();
+        date.setDate(date.getDate() + 30);
+        targetDate.value = date.toISOString().split('T')[0];
+    }
 }
 
 async function generatePlan() {
-    if (!selectedUploadId) return;
+    const uploadSelect = $('uploadSelect');
+    const hoursPerDay = $('hoursPerDay');
+    const targetDate = $('targetDate');
+    const generateBtn = $('generatePlanBtn');
 
-    const startDate = document.getElementById('startDate').value;
-    const endDate = document.getElementById('endDate').value;
-    const dailyHours = parseFloat(document.getElementById('dailyHours').value);
+    if (!uploadSelect || !hoursPerDay || !targetDate || !generateBtn) return;
 
-    if (!startDate || !endDate) {
-        alert('Please select start and end dates');
+    const uploadId = uploadSelect.value;
+    const hours = parseInt(hoursPerDay.value) || 2;
+    const target = targetDate.value;
+
+    if (!uploadId) {
+        if (typeof toast !== 'undefined') toast.warning('Please select a syllabus');
         return;
     }
 
-    const btn = document.getElementById('generatePlanBtn');
-    btn.disabled = true;
-    btn.textContent = 'Generating Plan...';
-
-    try {
-        const result = await api.generateStudyPlan(selectedUploadId, startDate, endDate, dailyHours);
-        
-        displayPlan(result.plan);
-
-    } catch (error) {
-        alert('Failed to generate study plan: ' + error.message);
-    } finally {
-        btn.disabled = false;
-        btn.textContent = 'Generate Study Plan';
+    if (!target) {
+        if (typeof toast !== 'undefined') toast.warning('Please select a target date');
+        return;
     }
-}
 
-async function loadExistingPlan(uploadId) {
+    generateBtn.disabled = true;
+    const originalText = generateBtn.textContent;
+    generateBtn.textContent = 'Generating...';
+
     try {
-        const result = await api.getStudyPlan(uploadId);
-        
-        if (result.plan && result.plan.plan_data) {
-            displayPlan(result.plan.plan_data);
+        console.log(`📅 Generating plan: upload=${uploadId}, hours=${hours}, date=${target}`);
+
+        const response = await window.api.generatePlan(uploadId, hours, target);
+
+        console.log('✅ Plan response:', response);
+
+        if (response.success && response.schedule) {
+            currentPlan = response;
+            
+            // Display immediately from response (no re-fetch needed)
+            displayPlan(response);
+            
+            if (typeof toast !== 'undefined') {
+                toast.success(`Study plan created with ${response.total_days || response.schedule.length} days!`);
+            }
+        } else {
+            throw new Error(response.error || 'Generation failed');
         }
 
     } catch (error) {
-        // No existing plan, that's okay
-        document.getElementById('planSection').style.display = 'none';
+        console.error('❌ Plan generation error:', error);
+        if (typeof toast !== 'undefined') {
+            toast.error(error.message || 'Failed to generate plan');
+        } else {
+            alert('Failed to generate plan: ' + error.message);
+        }
+    } finally {
+        generateBtn.disabled = false;
+        generateBtn.textContent = originalText;
     }
 }
 
-function displayPlan(planData) {
-    if (!planData || !planData.weeks) {
-        document.getElementById('planSection').style.display = 'none';
+function displayPlan(plan) {
+    const planContent = $('studyPlanContent');
+    
+    if (!planContent) return;
+
+    if (!plan.schedule || plan.schedule.length === 0) {
+        showEmptyPlanState();
         return;
     }
 
-    document.getElementById('planSection').style.display = 'block';
+    let html = '';
 
-    const timeline = document.getElementById('planTimeline');
-    const weeks = planData.weeks;
-
-    timeline.innerHTML = Object.keys(weeks).sort().map(weekKey => {
-        const week = weeks[weekKey];
-        
-        return `
-            <div class="timeline-item">
-                <div class="timeline-marker"></div>
-                <div class="timeline-content">
-                    <div class="week-header">
-                        ${weekKey.replace('_', ' ').toUpperCase()}
-                    </div>
-                    <div style="color: var(--text-tertiary); font-size: 0.875rem; margin-bottom: 1rem;">
-                        ${formatDate(week.start_date)} - ${formatDate(week.end_date)} • ${week.total_hours} hours
-                    </div>
-                    <ul class="topic-list">
-                        ${week.topics.map(topic => `
-                            <li class="topic-item">
-                                <div>
-                                    <div style="font-weight: 600;">${topic.topic_name}</div>
-                                    <div style="font-size: 0.75rem; color: var(--text-tertiary); margin-top: 0.25rem;">
-                                        ${topic.hours} hours • ${topic.difficulty}
-                                    </div>
-                                    ${topic.tasks && topic.tasks.length > 0 ? `
-                                        <ul style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-secondary); list-style: inside;">
-                                            ${topic.tasks.map(task => `<li>${task}</li>`).join('')}
-                                        </ul>
-                                    ` : ''}
-                                </div>
-                            </li>
-                        `).join('')}
-                    </ul>
-                </div>
+    plan.schedule.forEach((day, index) => {
+        html += `
+            <div style="margin-bottom: 2rem; padding: 1.5rem; background: var(--bg-secondary); border-radius: 0.5rem; border-left: 4px solid var(--primary-600);">
+                <h3 style="font-weight: 600; margin-bottom: 1rem; color: var(--primary-600);">
+                    Day ${day.day || index + 1} - ${formatDate(day.date)}
+                </h3>
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    ${(day.topics || []).map(topic => `
+                        <li style="padding: 0.75rem; background: var(--bg-primary); border-radius: 0.375rem; margin-bottom: 0.5rem;">
+                            <strong>${escapeHtml(topic.name)}</strong>
+                            ${topic.hours ? `<span style="color: var(--text-tertiary); margin-left: 0.5rem;">(${topic.hours}h)</span>` : ''}
+                        </li>
+                    `).join('')}
+                </ul>
             </div>
         `;
-    }).join('');
+    });
+
+    planContent.innerHTML = html;
+
+    console.log(`✅ Displayed ${plan.schedule.length} days`);
+}
+
+async function loadStudyPlan() {
+    const planContent = $('studyPlanContent');
+    
+    if (!planContent) return;
+
+    planContent.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-tertiary);">Loading...</div>';
+
+    try {
+        const response = await window.api.getStudyPlan();
+
+        console.log('📅 Study plan fetch:', response);
+
+        if (response.success && response.schedule) {
+            currentPlan = response;
+            displayPlan(response);
+        } else {
+            showEmptyPlanState();
+        }
+
+    } catch (error) {
+        console.log('📅 Plan fetch result:', error.message);
+
+        // Handle 404 as normal empty state
+        if (error.message && error.message.toLowerCase().includes('no study plan found')) {
+            console.log('ℹ️ No plan exists yet (expected)');
+            showEmptyPlanState();
+        } else {
+            // Real errors
+            console.error('❌ Unexpected error:', error);
+            
+            planContent.innerHTML = `
+                <div style="text-align: center; padding: 3rem;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem; color: #ef4444;">⚠️</div>
+                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">Failed to load</h3>
+                    <p style="color: var(--text-tertiary); margin-bottom: 1rem;">${error.message}</p>
+                    <button onclick="loadStudyPlan()" class="btn btn-secondary">Retry</button>
+                </div>
+            `;
+            
+            if (typeof toast !== 'undefined') {
+                toast.error('Failed to load study plan');
+            }
+        }
+    }
+}
+
+function showEmptyPlanState() {
+    const planContent = $('studyPlanContent');
+    
+    if (!planContent) return;
+    
+    planContent.innerHTML = `
+        <div style="text-align: center; padding: 3rem;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">📅</div>
+            <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary);">
+                No study plan yet
+            </h3>
+            <p style="color: var(--text-tertiary);">
+                Generate a study plan to get started
+            </p>
+        </div>
+    `;
+}
+
+// Make loadStudyPlan globally accessible
+window.loadStudyPlan = loadStudyPlan;
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function formatDate(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    });
 }
