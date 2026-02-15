@@ -29,6 +29,22 @@ CORS(app, resources={
     }
 })
 
+CORS(app, resources={
+    r"/api/*": {
+        "origins": [
+            "http://127.0.0.1:5000",
+            "http://localhost:5000",
+            "http://127.0.0.1:5500",
+            "http://localhost:5500",
+            "https://studywisee.netlify.app",  # ✅ Netlify frontend
+            "study-wise-production.up.railway.app"  # ✅ Railway backend (if frontend calls itself)
+        ],
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"],
+        "supports_credentials": False
+    }
+})
+
 
 # Validate configuration
 try:
