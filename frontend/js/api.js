@@ -1,14 +1,22 @@
 /**
- * StudyWise API Client
- * Production-ready wrapper for Flask backend
- * All keys use snake_case to match backend expectations
+ * StudyWise API Client - Production Ready
+ * Handles all backend communication with proper error handling
  */
 
-// Auto-detect environment
-const API_BASE_URL = 
-    window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-        ? 'http://127.0.0.1:5000/api'
-        : 'study-wise-production-eaa1.up.railway.app';
+// ✅ Auto-detect environment and set correct base URL
+const API_BASE_URL = (function() {
+    const hostname = window.location.hostname;
+    
+    // Local development
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return 'http://127.0.0.1:5000/api';
+    }
+    
+    // Production - Railway backend
+    return 'https://study-wise-production-eaa1.up.railway.app/api';
+})();
+
+console.log('🌐 API Base URL:', API_BASE_URL);
 
 /**
  * User Management - Single Source of Truth
@@ -49,12 +57,14 @@ class StudyWiseAPI {
     }
 
     /**
-     * Generic request handler with error handling
+     * Generic request handler with comprehensive error handling
      */
     async request(endpoint, options = {}) {
         const url = `${this.baseURL}${endpoint}`;
         
         try {
+            console.log(`📡 API Request: ${options.method || 'GET'} ${endpoint}`);
+            
             const response = await fetch(url, {
                 ...options,
                 headers: {
@@ -63,13 +73,22 @@ class StudyWiseAPI {
                 },
             });
 
-            const data = await response.json();
+            // Try to parse JSON response
+            let data;
+            try {
+                data = await response.json();
+            } catch (e) {
+                throw new Error(`Invalid JSON response from server: ${response.statusText}`);
+            }
 
+            // Handle error responses
             if (!response.ok) {
                 const errorMessage = data.error || data.message || `HTTP ${response.status}`;
+                console.error(`❌ API Error [${endpoint}]:`, errorMessage);
                 throw new Error(errorMessage);
             }
 
+            console.log(`✅ API Success [${endpoint}]`);
             return data;
 
         } catch (error) {
@@ -101,7 +120,7 @@ class StudyWiseAPI {
             const data = await this.request(`/upload/uploads/${encodeURIComponent(this.userEmail)}`);
             return this.normalizeUploads(data);
         } catch (error) {
-            console.error('Failed to get uploads:', error);
+            console.error('getUploads failed:', error);
             return [];
         }
     }
@@ -122,13 +141,14 @@ class StudyWiseAPI {
             }
             return [];
         } catch (error) {
-            console.error('Failed to get topics:', error);
+            console.error('getTopics failed:', error);
             return [];
         }
     }
 
     /**
      * Upload syllabus PDF
+     * Uses FormData for multipart upload
      */
     async uploadSyllabus(file, subject) {
         const formData = new FormData();
@@ -137,9 +157,12 @@ class StudyWiseAPI {
         formData.append('email', this.userEmail);
         formData.append('ai_mode', AIMode.current);
 
+        console.log('📤 Uploading syllabus:', { subject, file: file.name });
+
         const response = await fetch(`${this.baseURL}/upload/syllabus`, {
             method: 'POST',
             body: formData,
+            // Don't set Content-Type - browser sets it with boundary
         });
 
         const data = await response.json();
@@ -148,6 +171,7 @@ class StudyWiseAPI {
             throw new Error(data.error || 'Upload failed');
         }
 
+        console.log('✅ Syllabus uploaded successfully');
         return data;
     }
 
@@ -160,6 +184,8 @@ class StudyWiseAPI {
         formData.append('upload_id', uploadId);
         formData.append('email', this.userEmail);
 
+        console.log('📤 Uploading PYQ:', { upload_id: uploadId, file: file.name });
+
         const response = await fetch(`${this.baseURL}/upload/pyq`, {
             method: 'POST',
             body: formData,
@@ -171,6 +197,7 @@ class StudyWiseAPI {
             throw new Error(data.error || 'PYQ upload failed');
         }
 
+        console.log('✅ PYQ uploaded successfully');
         return data;
     }
 
@@ -184,8 +211,8 @@ class StudyWiseAPI {
         return this.request('/quiz/generate', {
             method: 'POST',
             body: JSON.stringify({
-                topic_id: topicId,           // ✅ snake_case
-                num_questions: numQuestions, // ✅ snake_case
+                topic_id: topicId,
+                num_questions: numQuestions,
                 email: this.userEmail,
                 ai_mode: AIMode.current
             }),
@@ -202,7 +229,7 @@ class StudyWiseAPI {
         return this.request('/quiz/submit', {
             method: 'POST',
             body: JSON.stringify({
-                quiz_id: quizId,  // ✅ snake_case
+                quiz_id: quizId,
                 answers: answers,
                 email: this.userEmail,
             }),
@@ -217,35 +244,35 @@ class StudyWiseAPI {
         return this.request(`/quiz/history/${encodeURIComponent(this.userEmail)}`);
     }
 
-/**
- * Generate study plan
- * @param {string} uploadId - Upload UUID
- * @param {number} hoursPerDay - Study hours per day (1-12)
- * @param {string} endDate - Target completion date (YYYY-MM-DD)
- * Returns: { success, plan_id, schedule: [...] }
- */
-async generatePlan(uploadId, hoursPerDay, endDate) {
-    const today = new Date();
-    const startDate = today.toISOString().split('T')[0];
+    /**
+     * Generate study plan
+     * @param {string} uploadId - Upload UUID
+     * @param {number} hoursPerDay - Study hours per day (1-12)
+     * @param {string} endDate - Target completion date (YYYY-MM-DD)
+     * Returns: { success, plan_id, schedule: [...] }
+     */
+    async generatePlan(uploadId, hoursPerDay, endDate) {
+        const today = new Date();
+        const startDate = today.toISOString().split('T')[0];
 
-    console.log('📅 Generating plan:', {
-        upload_id: uploadId,
-        start_date: startDate,
-        end_date: endDate,
-        hours_per_day: hoursPerDay
-    });
-
-    return this.request('/plan/generate', {
-        method: 'POST',
-        body: JSON.stringify({
-            email: this.userEmail,
+        console.log('📅 Generating study plan:', {
             upload_id: uploadId,
             start_date: startDate,
             end_date: endDate,
             hours_per_day: hoursPerDay
-        }),
-    });
-}
+        });
+
+        return this.request('/plan/generate', {
+            method: 'POST',
+            body: JSON.stringify({
+                email: this.userEmail,
+                upload_id: uploadId,
+                start_date: startDate,
+                end_date: endDate,
+                hours_per_day: hoursPerDay
+            }),
+        });
+    }
 
     /**
      * Get existing study plan for current user
@@ -287,9 +314,9 @@ async generatePlan(uploadId, hoursPerDay, endDate) {
             method: 'POST',
             body: JSON.stringify({
                 email: this.userEmail,
-                day_of_week: dayOfWeek,  // ✅ snake_case
-                start_time: startTime,   // ✅ snake_case
-                end_time: endTime,       // ✅ snake_case
+                day_of_week: dayOfWeek,
+                start_time: startTime,
+                end_time: endTime,
                 title: title
             })
         });
@@ -322,7 +349,7 @@ async generatePlan(uploadId, hoursPerDay, endDate) {
                 email: this.userEmail,
                 subject: subject,
                 content: content,
-                note_id: noteId  // ✅ snake_case
+                note_id: noteId
             })
         });
     }
@@ -343,43 +370,6 @@ async generatePlan(uploadId, hoursPerDay, endDate) {
     async healthCheck() {
         return this.request('/health');
     }
-
-    /**
-     * Check Ollama (local AI) status
-     * Returns: { available, model }
-     */
-    async checkOllamaStatus() {
-        return this.request('/ai/status');
-    }
-
-    /**
-     * Check cloud AI (OpenAI) status
-     * Returns: { available }
-     */
-    async checkCloudStatus() {
-        return this.request('/ai/cloud-status');
-    }
-
-    /**
-     * Set AI mode for current user
-     */
-    async setAIMode(mode) {
-        return this.request('/ai/mode', {
-            method: 'POST',
-            body: JSON.stringify({
-                mode: mode,
-                user_id: this.userEmail  // ✅ snake_case
-            }),
-        });
-    }
-
-    /**
-     * Get current AI mode for user
-     * Returns: { mode }
-     */
-    async getCurrentAIMode() {
-        return this.request(`/ai/mode/${encodeURIComponent(this.userEmail)}`);
-    }
 }
 
 /**
@@ -394,6 +384,7 @@ window.API_BASE_URL = API_BASE_URL;
  * Utility Functions
  */
 function formatDate(dateString) {
+    if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { 
         year: 'numeric', 
@@ -403,6 +394,7 @@ function formatDate(dateString) {
 }
 
 function formatDateTime(dateString) {
+    if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleString('en-US', {
         year: 'numeric',
@@ -427,6 +419,5 @@ window.escapeHtml = escapeHtml;
 
 // Log initialization
 console.log('✅ StudyWise API initialized');
-console.log('🌐 Base URL:', API_BASE_URL);
-console.log('👤 User Email:', window.api.userEmail);
+console.log('📧 User:', window.api.userEmail);
 console.log('🤖 AI Mode:', AIMode.current);

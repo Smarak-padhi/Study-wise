@@ -23,11 +23,12 @@ CORS(app, resources={
             "http://127.0.0.1:5500",
             "http://localhost:5500",
             "https://studywisee.netlify.app",  # ✅ Netlify frontend
-            "study-wise-production-eaa1.up.railway.app"  # ✅ Railway backend (if frontend calls itself)
+            "https://*.netlify.app"  # ✅ Allow all Netlify preview deploys
         ],
         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization"],
-        "supports_credentials": False
+        "supports_credentials": False,
+        "max_age": 3600
     }
 })
 
@@ -93,10 +94,11 @@ def internal_error(error):
     return jsonify({'error': 'Internal server error'}), 500
 
 if __name__ == '__main__':
+    port = int(os.getenv('PORT', 5000))
     print("🚀 Starting StudyWise API...")
-    print(f"📍 API will be available at: http://127.0.0.1:5000")
-    print(f"📍 Health check: http://127.0.0.1:5000/api/health")
-    app.run(host='127.0.0.1', port=5000, debug=True)
+    print(f"📍 Port: {port}")
+    print(f"📍 Health: /api/health")
+    app.run(host='0.0.0.0', port=port, debug=os.getenv('FLASK_ENV') != 'production')
 
 @app.get("/")
 def home():

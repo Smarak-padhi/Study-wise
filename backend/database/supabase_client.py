@@ -143,50 +143,47 @@ class SupabaseDB:
     # Study plan operations
     def create_study_plan(self, user_id, upload_id, schedule, start_date, end_date, hours_per_day=2):
         """
-        Create a new study plan with proper error handling
+        Create study plan with proper error handling
+        Note: 'schedule' maps to 'schedule' column in Supabase (after rename)
         """
         try:
-            # Prepare data (let DB generate UUID and timestamp)
             plan_data = {
                 'user_id': user_id,
                 'upload_id': upload_id,
-                'schedule': schedule,
+                'schedule': schedule,  # ✅ Matches renamed column
                 'start_date': start_date,
                 'end_date': end_date,
                 'hours_per_day': hours_per_day
             }
             
-            print(f"📝 Inserting study plan for user: {user_id}")
+            print(f"📝 Creating study plan for user: {user_id}")
+            print(f"   Schedule days: {len(schedule) if schedule else 0}")
             
-            # Execute insert
             response = self.client.table('study_plans').insert(plan_data).execute()
             
-            # ✅ CRITICAL: Check for errors FIRST
+            # ✅ Check for errors
             if hasattr(response, 'error') and response.error:
                 error_msg = str(response.error)
-                print(f"❌ Supabase error: {error_msg}")
-                raise Exception(f"Database insert failed: {error_msg}")
+                print(f"❌ Supabase insert error: {error_msg}")
+                raise Exception(f"Database error: {error_msg}")
             
-            # Check for data
             if response.data and len(response.data) > 0:
                 plan = response.data[0]
                 print(f"✅ Plan created: {plan['id']}")
                 return plan
             
-            print(f"⚠️ No data returned from insert")
+            print("⚠️ No data returned from insert")
             return None
             
         except Exception as e:
-            print(f"❌ Error in create_study_plan: {str(e)}")
+            print(f"❌ create_study_plan error: {str(e)}")
             import traceback
             print(traceback.format_exc())
             raise
 
 
     def get_latest_study_plan(self, user_id):
-        """
-        Get most recent study plan with error handling
-        """
+        """Get most recent study plan"""
         try:
             print(f"🔍 Fetching plan for user: {user_id}")
             
@@ -197,18 +194,22 @@ class SupabaseDB:
                 .limit(1)\
                 .execute()
             
+            # ✅ Check for errors
             if hasattr(response, 'error') and response.error:
                 error_msg = str(response.error)
-                print(f"❌ Supabase error: {error_msg}")
-                raise Exception(f"Database query failed: {error_msg}")
+                print(f"❌ Supabase query error: {error_msg}")
+                raise Exception(f"Database error: {error_msg}")
             
             if response.data and len(response.data) > 0:
-                return response.data[0]
+                plan = response.data[0]
+                print(f"✅ Found plan: {plan['id']}")
+                return plan
             
+            print(f"ℹ️ No plan found for user: {user_id}")
             return None
             
         except Exception as e:
-            print(f"❌ Error in get_latest_study_plan: {str(e)}")
+            print(f"❌ get_latest_study_plan error: {str(e)}")
             import traceback
             print(traceback.format_exc())
             raise
