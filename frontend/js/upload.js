@@ -5,7 +5,11 @@ const $ = (id) => document.getElementById(id);
 let currentUploads = [];
 
 document.addEventListener('DOMContentLoaded', async () => {
-    if (!$('syllabusFileInput')) {
+    console.log('🔄 Upload page DOMContentLoaded fired');
+    
+    const syllabusFileInput = $('syllabusFileInput');
+    
+    if (!syllabusFileInput) {
         console.log('Not on upload page');
         return;
     }
@@ -15,6 +19,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     initUserInfo();
     setupSyllabusUpload();
     setupPYQUpload();
+    
+    // ✅ CRITICAL: Load uploads on page load
     await loadUploads();
 });
 
@@ -35,7 +41,10 @@ function setupSyllabusUpload() {
     const uploadBtn = $('uploadSyllabusBtn');
     const subjectInput = $('subjectInput');
 
-    if (!fileInput || !uploadZone || !uploadBtn || !subjectInput) return;
+    if (!fileInput || !uploadZone || !uploadBtn || !subjectInput) {
+        console.warn('⚠️ Some syllabus upload elements missing');
+        return;
+    }
 
     uploadZone.addEventListener('click', () => fileInput.click());
 
@@ -58,6 +67,8 @@ function setupSyllabusUpload() {
         if (!file || !subject) {
             if (typeof toast !== 'undefined') {
                 toast.error('Please select a file and enter a subject');
+            } else {
+                alert('Please select a file and enter a subject');
             }
             return;
         }
@@ -66,12 +77,19 @@ function setupSyllabusUpload() {
         uploadBtn.textContent = 'Uploading...';
 
         try {
+            console.log('📤 Uploading syllabus:', subject);
+            
             const result = await window.api.uploadSyllabus(file, subject);
+            
+            console.log('✅ Upload successful:', result);
             
             if (typeof toast !== 'undefined') {
                 toast.success(`Uploaded! Extracted ${result.topics_count || 0} topics`);
+            } else {
+                alert(`Success! Extracted ${result.topics_count || 0} topics`);
             }
             
+            // Reset form
             fileInput.value = '';
             subjectInput.value = '';
             uploadZone.innerHTML = `
@@ -80,12 +98,15 @@ function setupSyllabusUpload() {
                 <div class="upload-hint">PDF files only (Max 30MB)</div>
             `;
             
+            // ✅ RELOAD UPLOADS LIST
             await loadUploads();
             
         } catch (error) {
-            console.error('Upload error:', error);
+            console.error('❌ Upload error:', error);
             if (typeof toast !== 'undefined') {
                 toast.error(error.message || 'Upload failed');
+            } else {
+                alert(`Upload failed: ${error.message}`);
             }
         } finally {
             uploadBtn.disabled = false;
@@ -100,7 +121,10 @@ function setupPYQUpload() {
     const uploadBtn = $('uploadPyqBtn');
     const subjectSelect = $('pyqSubjectSelect');
 
-    if (!fileInput || !uploadZone || !uploadBtn || !subjectSelect) return;
+    if (!fileInput || !uploadZone || !uploadBtn || !subjectSelect) {
+        console.warn('⚠️ Some PYQ upload elements missing');
+        return;
+    }
 
     uploadZone.addEventListener('click', () => fileInput.click());
 
@@ -140,6 +164,8 @@ function setupPYQUpload() {
             
             if (typeof toast !== 'undefined') {
                 toast.success('PYQ uploaded successfully!');
+            } else {
+                alert('PYQ uploaded successfully!');
             }
             
             fileInput.value = '';
@@ -150,7 +176,7 @@ function setupPYQUpload() {
             `;
             
         } catch (error) {
-            console.error('PYQ upload error:', error);
+            console.error('❌ PYQ upload error:', error);
             if (typeof toast !== 'undefined') {
                 toast.error(error.message || 'PYQ upload failed');
             }
@@ -165,15 +191,21 @@ async function loadUploads() {
     const container = $('uploadsList');
     const pyqSelect = $('pyqSubjectSelect');
 
-    if (!container) return;
+    if (!container) {
+        console.warn('⚠️ uploadsList container not found');
+        return;
+    }
 
+    console.log('🔍 Loading uploads...');
+    
     container.innerHTML = '<div style="text-align:center;padding:2rem;color:#6B7280;">Loading...</div>';
 
     try {
         const uploads = await window.api.getUploads();
         currentUploads = uploads;
 
-        console.log(`📦 Loaded ${uploads.length} uploads`);
+        console.log('📦 Uploads loaded:', uploads);
+        console.log('📊 Upload count:', uploads.length);
 
         if (uploads.length === 0) {
             container.innerHTML = `
@@ -191,12 +223,14 @@ async function loadUploads() {
             return;
         }
 
+        // Populate PYQ dropdown
         if (pyqSelect) {
             pyqSelect.innerHTML = '<option value="">Choose a subject...</option>' +
                 uploads.map(u => `<option value="${u.id}">${u.subject || u.filename || 'Untitled'}</option>`).join('');
             pyqSelect.disabled = false;
         }
 
+        // Display uploads
         container.innerHTML = uploads.map(upload => `
             <div class="card" style="margin-bottom: 1rem;">
                 <div style="padding: 1.5rem;">
@@ -216,19 +250,26 @@ async function loadUploads() {
             </div>
         `).join('');
 
+        console.log(`✅ Displayed ${uploads.length} uploads`);
+
     } catch (error) {
-        console.error('Load uploads error:', error);
+        console.error('❌ Load uploads error:', error);
         container.innerHTML = `
-            <div style="text-align: center; padding: 3rem 1rem;">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">📂</div>
-                <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">No uploads yet</h3>
-                <p style="color: #6B7280;">Upload a syllabus to get started</p>
+            <div style="text-align: center; padding: 3rem 1rem; color: #ef4444;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+                <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">Failed to load uploads</h3>
+                <p style="color: #6B7280;">${error.message}</p>
+                <button onclick="loadUploads()" class="btn btn-secondary" style="margin-top: 1rem;">Retry</button>
             </div>
         `;
     }
 }
 
+// Make loadUploads globally accessible for retry button
+window.loadUploads = loadUploads;
+
 function formatDate(dateString) {
+    if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 }
