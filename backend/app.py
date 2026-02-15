@@ -1,11 +1,14 @@
+# At the top of app.py
 from flask import Flask, jsonify
 from flask_cors import CORS
 from config import Config
-from routes import upload_bp, quiz_bp, plan_bp, dashboard_bp
-from routes.ai_mode import ai_bp
-from routes.timetable import timetable_bp
-from routes.notes import notes_bp
 import os
+
+# These imports might fail if blueprints don't exist
+from routes.upload import upload_bp
+from routes.quiz import quiz_bp
+from routes.plan import plan_bp
+from routes.dashboard import dashboard_bp
 
 # Initialize Flask app
 app = Flask(__name__)
