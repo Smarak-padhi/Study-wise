@@ -13,7 +13,7 @@ const API_BASE_URL = (function() {
     }
     
     // Production - Railway backend
-    return 'https://study-wise-production-eaa1.up.railway.app/api';
+    return 'https://study-wise-production.up.railway.app/api';
 })();
 
 console.log('🌐 API Base URL:', API_BASE_URL);
